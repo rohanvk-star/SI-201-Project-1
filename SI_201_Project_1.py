@@ -17,12 +17,27 @@ def main():
         header = next(reader)
         print("Column names:", header)
 
-        # read and print first row
-        first_row = next(reader)
-        print("First row:", first_row)
-
         # print the number of rows
         rows = list(reader)
         print("Number of rows:", len(rows))
 
+        # read and print first row
+        first_row = rows[0]
+        print("First row:", first_row)
+
+        # calculate percent of furniture 
+        column_name = 'Category'
+        col_index = header.index(column_name)
+
+        row_count = len(rows)
+        furniture_count = 0
+        for i in range(len(rows)):
+            row = rows[i]
+            category = row[col_index]
+            if category == 'Furniture':
+                furniture_count += 1
+        furniture_percent = (furniture_count / row_count) * 100
+        print(f"Percent of furniture categories: {furniture_percent:.2f}%")
+        
 main()
+
