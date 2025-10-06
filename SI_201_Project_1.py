@@ -57,5 +57,10 @@ def main():
         sales_percent = (over_hundred_count / row_count) * 100
         print(f"Percent of sales in the West over 100: {sales_percent:.2f}%")
 
+        # Open a new text file in write mode
+        with open('result.txt', 'w') as file:
+            file.write(f"Percent of furniture categories: {furniture_percent:.2f}%\n")
+            file.write(f"Percent of sales in the West over 100: {sales_percent:.2f}%\n")
+
 main()
 
