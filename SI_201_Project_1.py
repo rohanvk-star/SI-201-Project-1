@@ -38,6 +38,19 @@ def main():
                 furniture_count += 1
         furniture_percent = (furniture_count / row_count) * 100
         print(f"Percent of furniture categories: {furniture_percent:.2f}%")
-        
+
+        # calculate percent of sales over 100
+        column_name_sales = 'Sales'
+        col_index_sales = header.index(column_name_sales)
+
+        over_hundred_count = 0
+        for i in range(len(rows)):
+            current_row = rows[i]
+            sales_amount = float(current_row[col_index_sales])
+            if sales_amount >= 100:
+                over_hundred_count += 1
+        sales_percent = (over_hundred_count / row_count) * 100
+        print(f"Percent of sales over 100: {sales_percent:.2f}%")
+
 main()
 
