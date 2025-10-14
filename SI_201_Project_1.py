@@ -28,77 +28,47 @@ def load_sales(csv_filename):
 def calculate_percent_furniture(sales_list):
     # takes a list of sales where each element is a dictionary 
     # returns percentage of furniture sales 
-    pass
+    furniture_count = 0
+    for i in range(len(sales_list)):
+        item = sales_list[i]
+        category = item["Category"]
+        if category == "Furniture":
+            furniture_count += 1
+    percentage = (furniture_count / len(sales_list)) * 100
+    return percentage
 
 def calculate_percent_sales_in_region_over_threshold(sales_list, region, threshold):
     # takes a list of sales where each element is a dictionary
     # calculates total sales where region is the specified region and sales value is over the threshold
     # returns percentage of count of sales over threshold within specified region
-    pass
+
+    over_hundred_count = 0
+    for i in range(len(sales_list)):
+        current_item = sales_list[i]
+        sales_region = current_item["Region"]
+        if sales_region == region:
+            sales_amount = float(current_item["Sales"])
+            if sales_amount >= threshold:
+                over_hundred_count += 1
+    sales_percent = (over_hundred_count / len(sales_list)) * 100
+    return sales_percent
 
 def generate_report(percent_furniture, percent_sales_in_region_over_threshold):
     # creates a text file containing the calculated values 
-    pass
+    # Open a new text file in write mode
+    with open('result.txt', 'w') as file:
+        file.write(f"Percent of furniture categories: {percent_furniture:.2f}%\n")
+        file.write(f"Percent of count of sales in the West over 100: {percent_sales_in_region_over_threshold:.2f}%\n")
 
 def main():
     sales_list = load_sales('SampleSuperstore.csv')
     first_row = sales_list[0]
     print(first_row)
-
-def old_main():
-    filename = 'SampleSuperstore.csv'
-
-    with open(filename, mode='r', newline='', encoding='utf-8') as file:
-        reader = csv.reader(file)
-
-        # read and print names of columns 
-        header = next(reader)
-        print("Column names:", header)
-
-        # print the number of rows
-        rows = list(reader)
-        print("Number of rows:", len(rows))
-
-        # read and print first row
-        first_row = rows[0]
-        print("First row:", first_row)
-
-        # calculate percent of furniture 
-        column_name = 'Category'
-        col_index = header.index(column_name)
-
-        row_count = len(rows)
-        furniture_count = 0
-        for i in range(len(rows)):
-            row = rows[i]
-            category = row[col_index]
-            if category == 'Furniture':
-                furniture_count += 1
-        furniture_percent = (furniture_count / row_count) * 100
-        print(f"Percent of furniture categories: {furniture_percent:.2f}%")
-
-        # calculate percent of count of sales over 100 in the west
-        column_name_sales = 'Sales'
-        col_index_sales = header.index(column_name_sales)
-
-        column_name_region = 'Region'
-        col_index_region = header.index(column_name_region)
-
-        over_hundred_count = 0
-        for i in range(len(rows)):
-            current_row = rows[i]
-            sales_region = current_row[col_index_region]
-            if sales_region == 'West':
-                sales_amount = float(current_row[col_index_sales])
-                if sales_amount >= 100:
-                    over_hundred_count += 1
-        sales_percent = (over_hundred_count / row_count) * 100
-        print(f"Percent of count of sales in the West over 100: {sales_percent:.2f}%")
-
-        # Open a new text file in write mode
-        with open('result.txt', 'w') as file:
-            file.write(f"Percent of furniture categories: {furniture_percent:.2f}%\n")
-            file.write(f"Percent of count of sales in the West over 100: {sales_percent:.2f}%\n")
+    percent_furniture = calculate_percent_furniture(sales_list)
+    print(f"Percent of furniture categories: {percent_furniture:.2f}%")
+    sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
+    print(f"Percent of count of sales in the West over 100: {sales_percent:.2f}%")
+    generate_report(percent_furniture, sales_percent)
 
 main()
 
