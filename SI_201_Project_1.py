@@ -6,6 +6,7 @@
 # Asked Chatgpt hints for debugging and suggesting the general sturcture of the code
 
 import csv
+import unittest
 
 def load_sales(csv_filename):
     # load csv file into a list where each element in the list is a dictionary 
@@ -70,5 +71,19 @@ def main():
     print(f"Percent of count of sales in the West over 100: {sales_percent:.2f}%")
     generate_report(percent_furniture, sales_percent)
 
-main()
+# Unit tests
 
+class TestAdd(unittest.TestCase):
+    def test_percent_calculation(self):
+        sales_list = load_sales('SampleSuperstore.csv')
+        percent_furniture = calculate_percent_furniture(sales_list)
+        self.assertAlmostEqual(percent_furniture, 21.222733640)
+
+    def test_percent_calculation_threshold(self):
+        sales_list = load_sales('SampleSuperstore.csv')
+        sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
+        self.assertAlmostEqual(sales_percent, 12.6375825495)
+
+if __name__ == '__main__':
+    unittest.main()
+    main()
