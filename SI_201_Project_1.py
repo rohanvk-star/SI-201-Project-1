@@ -20,7 +20,10 @@ def load_sales(csv_filename):
             row_dict = {}
             for i in range(len(header)):
                 column_name = header[i]
-                column_value = current_row[i]
+                if column_name == "Sales":
+                    column_value = float(current_row[i])
+                else:
+                    column_value = current_row[i]
                 row_dict[column_name] = column_value
             data.append(row_dict)
 
@@ -48,7 +51,7 @@ def calculate_percent_sales_in_region_over_threshold(sales_list, region, thresho
         current_item = sales_list[i]
         sales_region = current_item["Region"]
         if sales_region == region:
-            sales_amount = float(current_item["Sales"])
+            sales_amount = current_item["Sales"]
             if sales_amount >= threshold:
                 over_hundred_count += 1
     sales_percent = (over_hundred_count / len(sales_list)) * 100
@@ -64,7 +67,9 @@ def generate_report(percent_furniture, percent_sales_in_region_over_threshold):
 def main():
     sales_list = load_sales('SampleSuperstore.csv')
     first_row = sales_list[0]
-    print(first_row)
+    print("List of variables = ", first_row.keys())
+    print("First row = ", first_row)
+    print("Number of rows = ", len(sales_list))
     percent_furniture = calculate_percent_furniture(sales_list)
     print(f"Percent of furniture categories: {percent_furniture:.2f}%")
     sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
@@ -84,6 +89,8 @@ class TestAdd(unittest.TestCase):
         sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
         self.assertAlmostEqual(sales_percent, 12.6375825495)
 
+    
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(exit=False)
     main()
