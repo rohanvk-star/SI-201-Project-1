@@ -29,41 +29,44 @@ def load_sales(csv_filename):
 
     return data
 
-def calculate_percent_category(sales_list, category):
+# This function references the following fields: Sales, Category, and Ship Mode
+def calculate_percent_category(sales_list, category, ship_mode):
     # takes a list of sales where each element is a dictionary 
-    # returns percentage of sales in supplied category
+    # returns percentage of sales in supplied category by ship_mode
 
     # Handle corner case
     if len(sales_list) == 0:
         return 0
     
-    furniture_count = 0
-    for i in range(len(sales_list)):
-        item = sales_list[i]
-        item_category = item["Category"]
-        if item_category == category:
-            furniture_count += 1
-    percentage = (furniture_count / len(sales_list)) * 100
+    matching_count = 0
+    for item in sales_list:
+        if item["Category"] == category and item["Ship Mode"] == ship_mode:
+            matching_count += 1
+    percentage = (matching_count / len(sales_list)) * 100
     return percentage
 
-def calculate_percent_sales_in_region_over_threshold(sales_list, region, threshold):
+# This function references the following fields: Sales, Region, and Segment
+def calculate_percent_sales_in_region_over_threshold(sales_list, region, segment, threshold):
     # takes a list of sales where each element is a dictionary
-    # calculates total sales where region is the specified region and sales value is over the threshold
+    # calculates total sales where region is the specified region, segment is consumer, and sales value is over the threshold
     # returns percentage of count of sales over threshold within specified region
 
     # Handle corner case
     if len(sales_list) == 0:
         return 0
     
-    over_hundred_count = 0
-    for i in range(len(sales_list)):
-        current_item = sales_list[i]
-        sales_region = current_item["Region"]
-        if sales_region == region:
-            sales_amount = current_item["Sales"]
-            if sales_amount >= threshold:
-                over_hundred_count += 1
-    sales_percent = (over_hundred_count / len(sales_list)) * 100
+    qualified_count = 0
+    over_threshold_count = 0
+
+    for item in sales_list:
+        if item["Region"] == region and item["Segment"] == segment:
+            qualified_count += 1
+            if item["Sales"] >= threshold:
+                over_threshold_count += 1
+    if qualified_count == 0:
+        return 0
+
+    sales_percent = (over_threshold_count / qualified_count) * 100
     return sales_percent
 
 def generate_report(percent_furniture, percent_sales_in_region_over_threshold):
@@ -79,9 +82,9 @@ def main():
     print("List of variables = ", first_row.keys())
     print("First row = ", first_row)
     print("Number of rows = ", len(sales_list))
-    percent_furniture = calculate_percent_category(sales_list, "Furniture")
+    percent_furniture = calculate_percent_category(sales_list, "Furniture", "Standard Class")
     print(f"Percent of furniture categories: {percent_furniture:.2f}%")
-    sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
+    sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", "Consumer", 100)
     print(f"Percent of count of sales in the West over 100: {sales_percent:.2f}%")
     generate_report(percent_furniture, sales_percent)
 
@@ -94,61 +97,69 @@ class TestAdd(unittest.TestCase):
             "Category": "Furniture",
             "Region": "West",
             "Sales": 200,
+            "Segment": "Consumer",
+            "Ship Mode": "Standard Class"
         })
         self.mock_sales_list.append({
             "Category": "Technology",
             "Region": "East",
             "Sales": 200,
+            "Segment": "Corporate",
+            "Ship Mode": "Standard Class"
         })
         self.mock_sales_list.append({
             "Category": "Furniture",
             "Region": "East",
             "Sales": 50,
+            "Segment": "Corporate",
+            "Ship Mode": "Second Class"
         })
         self.mock_sales_list.append({
             "Category": "Technology",
             "Region": "West",
             "Sales": 75,
+            "Segment": "Consumer",
+            "Ship Mode": "Second Class"
         })
 
     # Test cases for percent furniture function
 
     def test_percent_calculation(self):
-        percent_furniture = calculate_percent_category(self.mock_sales_list, "Furniture")
-        self.assertAlmostEqual(percent_furniture, 50)
+        percent_furniture = calculate_percent_category(self.mock_sales_list, "Furniture", "Standard Class")
+        self.assertAlmostEqual(percent_furniture, 25.0)
 
     def test_percent_calculation_category(self):
-        percent_technology = calculate_percent_category(self.mock_sales_list, "Technology")
-        self.assertAlmostEqual(percent_technology, 50)
+        percent_technology = calculate_percent_category(self.mock_sales_list, "Technology", "Standard Class")
+        self.assertAlmostEqual(percent_technology, 25.0)
 
     # Test edge case - pass an empty list 
     def test_percent_calculation_edge_case(self):
-        sales_percent = calculate_percent_category([], "Furniture")
+        sales_percent = calculate_percent_category([], "Furniture", "Second Class")
         self.assertAlmostEqual(sales_percent, 0)
 
     # Test edge case - pass a nonexisting category 
     def test_percent_calculation_edge_case_bad_category(self):
-        sales_percent = calculate_percent_category(self.mock_sales_list, "ABCD")
+        sales_percent = calculate_percent_category(self.mock_sales_list, "ABCD", "Standard Class")
         self.assertAlmostEqual(sales_percent, 0)
 
     # Test cases for percent sales function 
 
     def test_percent_calculation_threshold(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "West", 100)
-        self.assertAlmostEqual(sales_percent, 25)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "West", "Consumer", 100)
+        self.assertAlmostEqual(sales_percent, 50.0)
 
     def test_percent_calculation_threshold_another_region(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "East", 100)
-        self.assertAlmostEqual(sales_percent, 25)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "East", "Consumer", 100)
+        self.assertAlmostEqual(sales_percent, 0)
 
     # Test edge case - unusually large threshold
     def test_percent_calculation_sales_edge_case(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "West", 1000000)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "West", "Corporate", 1000000)
         self.assertAlmostEqual(sales_percent, 0)
 
     # Test edge case - bad region
     def test_percent_calculation_sales_edge_case_bad_region(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "ABCD", 100)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "ABCD", "Corporate", 100)
         self.assertAlmostEqual(sales_percent, 0)
 
 if __name__ == '__main__':
