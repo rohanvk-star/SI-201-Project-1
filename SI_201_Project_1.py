@@ -32,6 +32,11 @@ def load_sales(csv_filename):
 def calculate_percent_furniture(sales_list):
     # takes a list of sales where each element is a dictionary 
     # returns percentage of furniture sales 
+
+    # Handle corner case
+    if len(sales_list) == 0:
+        return 0
+    
     furniture_count = 0
     for i in range(len(sales_list)):
         item = sales_list[i]
@@ -46,6 +51,10 @@ def calculate_percent_sales_in_region_over_threshold(sales_list, region, thresho
     # calculates total sales where region is the specified region and sales value is over the threshold
     # returns percentage of count of sales over threshold within specified region
 
+    # Handle corner case
+    if len(sales_list) == 0:
+        return 0
+    
     over_hundred_count = 0
     for i in range(len(sales_list)):
         current_item = sales_list[i]
@@ -79,17 +88,26 @@ def main():
 # Unit tests
 
 class TestAdd(unittest.TestCase):
+    def setUp(self):
+        self.sales_list = load_sales('SampleSuperstore.csv')
+
     def test_percent_calculation(self):
-        sales_list = load_sales('SampleSuperstore.csv')
-        percent_furniture = calculate_percent_furniture(sales_list)
+        percent_furniture = calculate_percent_furniture(self.sales_list)
         self.assertAlmostEqual(percent_furniture, 21.222733640)
 
     def test_percent_calculation_threshold(self):
-        sales_list = load_sales('SampleSuperstore.csv')
-        sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "West", 100)
         self.assertAlmostEqual(sales_percent, 12.6375825495)
 
-    
+    # Test edge case - pass an empty list 
+    def test_percent_calculation_edge_case(self):
+        sales_percent = calculate_percent_furniture([])
+        self.assertAlmostEqual(sales_percent, 0)
+
+    # Test edge case - unusually large threshold
+    def test_percent_calculation_edge_case_two(self):
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "West", 1000000)
+        self.assertAlmostEqual(sales_percent, 0)
 
 if __name__ == '__main__':
     unittest.main(exit=False)
