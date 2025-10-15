@@ -29,9 +29,9 @@ def load_sales(csv_filename):
 
     return data
 
-def calculate_percent_furniture(sales_list):
+def calculate_percent_category(sales_list, category):
     # takes a list of sales where each element is a dictionary 
-    # returns percentage of furniture sales 
+    # returns percentage of sales in supplied category
 
     # Handle corner case
     if len(sales_list) == 0:
@@ -40,8 +40,8 @@ def calculate_percent_furniture(sales_list):
     furniture_count = 0
     for i in range(len(sales_list)):
         item = sales_list[i]
-        category = item["Category"]
-        if category == "Furniture":
+        item_category = item["Category"]
+        if item_category == category:
             furniture_count += 1
     percentage = (furniture_count / len(sales_list)) * 100
     return percentage
@@ -79,7 +79,7 @@ def main():
     print("List of variables = ", first_row.keys())
     print("First row = ", first_row)
     print("Number of rows = ", len(sales_list))
-    percent_furniture = calculate_percent_furniture(sales_list)
+    percent_furniture = calculate_percent_category(sales_list, "Furniture")
     print(f"Percent of furniture categories: {percent_furniture:.2f}%")
     sales_percent = calculate_percent_sales_in_region_over_threshold(sales_list, "West", 100)
     print(f"Percent of count of sales in the West over 100: {sales_percent:.2f}%")
@@ -91,22 +91,44 @@ class TestAdd(unittest.TestCase):
     def setUp(self):
         self.sales_list = load_sales('SampleSuperstore.csv')
 
+    # Test cases for percent furniture function
+
     def test_percent_calculation(self):
-        percent_furniture = calculate_percent_furniture(self.sales_list)
+        percent_furniture = calculate_percent_category(self.sales_list, "Furniture")
         self.assertAlmostEqual(percent_furniture, 21.222733640)
+
+    def test_percent_calculation_category(self):
+        percent_technology = calculate_percent_category(self.sales_list, "Technology")
+        self.assertAlmostEqual(percent_technology, 18.48108865)
+
+    # Test edge case - pass an empty list 
+    def test_percent_calculation_edge_case(self):
+        sales_percent = calculate_percent_category([], "Furniture")
+        self.assertAlmostEqual(sales_percent, 0)
+
+    # Test edge case - pass a nonexisting category 
+    def test_percent_calculation_edge_case_bad_category(self):
+        sales_percent = calculate_percent_category(self.sales_list, "ABCD")
+        self.assertAlmostEqual(sales_percent, 0)
+
+    # Test cases for percent sales function 
 
     def test_percent_calculation_threshold(self):
         sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "West", 100)
         self.assertAlmostEqual(sales_percent, 12.6375825495)
 
-    # Test edge case - pass an empty list 
-    def test_percent_calculation_edge_case(self):
-        sales_percent = calculate_percent_furniture([])
-        self.assertAlmostEqual(sales_percent, 0)
+    def test_percent_calculation_threshold_another_region(self):
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "East", 100)
+        self.assertAlmostEqual(sales_percent, 10.6463878)
 
     # Test edge case - unusually large threshold
-    def test_percent_calculation_edge_case_two(self):
+    def test_percent_calculation_sales_edge_case(self):
         sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "West", 1000000)
+        self.assertAlmostEqual(sales_percent, 0)
+
+    # Test edge case - bad region
+    def test_percent_calculation_sales_edge_case_bad_region(self):
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "ABCD", 100)
         self.assertAlmostEqual(sales_percent, 0)
 
 if __name__ == '__main__':
