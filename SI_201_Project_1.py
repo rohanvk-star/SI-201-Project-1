@@ -89,17 +89,37 @@ def main():
 
 class TestAdd(unittest.TestCase):
     def setUp(self):
-        self.sales_list = load_sales('SampleSuperstore.csv')
+        self.mock_sales_list = []
+        self.mock_sales_list.append({
+            "Category": "Furniture",
+            "Region": "West",
+            "Sales": 200,
+        })
+        self.mock_sales_list.append({
+            "Category": "Technology",
+            "Region": "East",
+            "Sales": 200,
+        })
+        self.mock_sales_list.append({
+            "Category": "Furniture",
+            "Region": "East",
+            "Sales": 50,
+        })
+        self.mock_sales_list.append({
+            "Category": "Technology",
+            "Region": "West",
+            "Sales": 75,
+        })
 
     # Test cases for percent furniture function
 
     def test_percent_calculation(self):
-        percent_furniture = calculate_percent_category(self.sales_list, "Furniture")
-        self.assertAlmostEqual(percent_furniture, 21.222733640)
+        percent_furniture = calculate_percent_category(self.mock_sales_list, "Furniture")
+        self.assertAlmostEqual(percent_furniture, 50)
 
     def test_percent_calculation_category(self):
-        percent_technology = calculate_percent_category(self.sales_list, "Technology")
-        self.assertAlmostEqual(percent_technology, 18.48108865)
+        percent_technology = calculate_percent_category(self.mock_sales_list, "Technology")
+        self.assertAlmostEqual(percent_technology, 50)
 
     # Test edge case - pass an empty list 
     def test_percent_calculation_edge_case(self):
@@ -108,27 +128,27 @@ class TestAdd(unittest.TestCase):
 
     # Test edge case - pass a nonexisting category 
     def test_percent_calculation_edge_case_bad_category(self):
-        sales_percent = calculate_percent_category(self.sales_list, "ABCD")
+        sales_percent = calculate_percent_category(self.mock_sales_list, "ABCD")
         self.assertAlmostEqual(sales_percent, 0)
 
     # Test cases for percent sales function 
 
     def test_percent_calculation_threshold(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "West", 100)
-        self.assertAlmostEqual(sales_percent, 12.6375825495)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "West", 100)
+        self.assertAlmostEqual(sales_percent, 25)
 
     def test_percent_calculation_threshold_another_region(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "East", 100)
-        self.assertAlmostEqual(sales_percent, 10.6463878)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "East", 100)
+        self.assertAlmostEqual(sales_percent, 25)
 
     # Test edge case - unusually large threshold
     def test_percent_calculation_sales_edge_case(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "West", 1000000)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "West", 1000000)
         self.assertAlmostEqual(sales_percent, 0)
 
     # Test edge case - bad region
     def test_percent_calculation_sales_edge_case_bad_region(self):
-        sales_percent = calculate_percent_sales_in_region_over_threshold(self.sales_list, "ABCD", 100)
+        sales_percent = calculate_percent_sales_in_region_over_threshold(self.mock_sales_list, "ABCD", 100)
         self.assertAlmostEqual(sales_percent, 0)
 
 if __name__ == '__main__':
